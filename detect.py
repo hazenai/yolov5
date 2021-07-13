@@ -88,7 +88,9 @@ def detect(save_img=False):
 
             p = Path(p)  # to Path
             save_path = str(save_dir / p.name)  # img.jpg
-            txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
+            # txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
+            txt_path = str(save_dir / 'labels' / p.stem)  # saving all detections to single file
+
             s += '%gx%g ' % img.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             if len(det):
@@ -104,7 +106,8 @@ def detect(save_img=False):
                 for *xyxy, conf, cls in reversed(det):
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
-                        line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format
+                        # line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format
+                        line = (frame, cls, *xyxy, conf) if opt.save_conf else (frame, cls, *xyxy)  # label format xyxy with frame
                         with open(txt_path + '.txt', 'a') as f:
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
@@ -114,7 +117,7 @@ def detect(save_img=False):
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
-
+            print(txt_path)
             # Stream results
             if view_img:
                 cv2.imshow(str(p), im0)
